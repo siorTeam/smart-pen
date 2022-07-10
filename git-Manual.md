@@ -2,10 +2,13 @@
 
 원하시는 폴더에서
 - `ssh`로 연동
+
 	```bash
 	git clone git@github.com:siorTeam/smart-pen.git
 	```
+
 - `https`로 연동
+
 	```bash
 	git clone https://github.com/siorTeam/smart-pen.git
 	```
@@ -22,6 +25,7 @@ git으로 작업하는 주요 사이클입니다
 ## 작업 전
 
 1. 현재 공유되어 있는 git 내용 다운로드
+
 	```bash
 	git pull
 	```
@@ -31,10 +35,13 @@ git으로 작업하는 주요 사이클입니다
 1. 변경한 작업들을 확인하고 싶으시다면
 
 	- 변경한 파일들 확인
+
 		```bash
 		git status
 		```
+
 	- 변경한 구체적인 내용
+
 		```bash
 		git diff 
 		```
@@ -46,6 +53,7 @@ git으로 작업하는 주요 사이클입니다
 	변경한 내용중에 버전으로 등록할 내용을 기록합니다
 
 	- 변경 내용 확인하며 Staging할 경우
+
 		```bash
 		git add -p
 		```
@@ -56,6 +64,7 @@ git으로 작업하는 주요 사이클입니다
 		- `q`: 나가기
 
 	- 모든 내용을 확인없이 Staging할 경우
+
 		```bash
 		git add .
 		```
@@ -95,6 +104,7 @@ git으로 작업하는 주요 사이클입니다
 1. staging 취소 (commit 하기 전)
 
 	모든 Staging된 내용을 unstaging
+
 	```bash
 	git restore --staged .
 	```
@@ -104,6 +114,7 @@ git으로 작업하는 주요 사이클입니다
 	막 작업한 commit을 수정하고 싶을 경우
 
 	1. 이전 버전 상태로 복원합니다.
+
 		```bash
 		git reset --soft HEAD~
 		```
@@ -111,10 +122,13 @@ git으로 작업하는 주요 사이클입니다
 
 	2. 수정 작업을 진행한 후...
 	3. 수정한 내용으로 staging
+
 		```bash
 		git add -p
 		```
+
 	4. 수정한 내용으로 commit
+
 		```bash
 		git commit -m "원하는 메세지"
 		```
@@ -124,6 +138,7 @@ git으로 작업하는 주요 사이클입니다
 1. 우선 충돌난 버전을 가져오기
 
 	공유된 내용 다운로드+병합, 자동 commit 막음
+
 	```bash
 	git pull --no-commit
 	```
@@ -153,6 +168,7 @@ git으로 작업하는 주요 사이클입니다
 3. 충돌 수정하기
 
 	구체적인 충돌 영역 확인하기
+
 	```bash
 	git diff
 	```
