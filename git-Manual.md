@@ -151,13 +151,15 @@ git으로 작업하는 주요 사이클입니다
 	git pull --no-commit
 	```
 
-	아래와 같은 메세지가 뜨면서 git이 MERGING state에 들어간다면
+	git이 MERGING state에 들어가는데
 	```
 	Auto-merging ...
 	CONFLICT (content): Merge conflict in ...
 	Automatic merge failed; fix conflicts and then commit the result.
 	```
-	파일간 충돌이 발생한 경우입니다
+	위와 같은 메세지가 뜬다면 파일간 충돌이 발생한 경우입니다
+
+	자세한 충돌 상황으로 파악하기 위해 다음을 진행합니다
 
 2. 충돌 상황 파악하기
 
