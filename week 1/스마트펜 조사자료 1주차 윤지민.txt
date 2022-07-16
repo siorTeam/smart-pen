@@ -1,0 +1,9 @@
+https://github.com/hpi-dhc/trace-imu
+https://stackoverflow.com/questions/66167733/getting-3d-position-coordinates-from-an-imu-sensor-on-python
+https://www.reddit.com/r/Python/comments/9vhewa/kalman_filter_trajectory_tracking/
+https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/
+https://pykalman.github.io/
+https://www.youtube.com/watch?v=6ijArKE8vKU
+https://github.com/xioTechnologies/Gait-Tracking
+https://www.youtube.com/watch?v=SI1w9uaBw6Q
+https://github.com/xioTechnologies/Oscillatory-Motion-Tracking-With-x-IMU
