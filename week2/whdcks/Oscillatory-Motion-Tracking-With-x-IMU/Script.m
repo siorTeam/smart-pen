@@ -29,8 +29,8 @@ xlabel('sample');
 ylabel('dps');
 title('Gyroscope');
 legend('X', 'Y', 'Z');
-
-figure('NumberTitle', 'off', 'Name', 'Accelerometer');
+% 
+% figure('NumberTitle', 'off', 'Name', 'Accelerometer');
 hold on;
 plot(acc(:,1), 'r');
 plot(acc(:,2), 'g');
@@ -45,8 +45,8 @@ legend('X', 'Y', 'Z');
 
 R = zeros(3,3,length(gyr));     % rotation matrix describing sensor relative to Earth
 
-ahrs = MahonyAHRS('SamplePeriod', samplePeriod, 'Kp', 1);
-
+ahrs = MahonyAHRS('SamplePeriod', samplePeriod, 'Kp', 0.5);
+%KP값을 조절하여 자이로값과 자기센서값의 가중치를 선택가능
 for i = 1:length(gyr)
     ahrs.UpdateIMU(gyr(i,:) * (pi/180), acc(i,:));	% gyroscope units must be radians
     R(:,:,i) = quatern2rotMat(ahrs.Quaternion)';    % transpose because ahrs provides Earth relative to sensor
