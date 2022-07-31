@@ -8,7 +8,7 @@ clc;                          	% clear the command terminal
 
 %%Calibrate Magnetometer
 s = serialport("COM7",115200);
-sampleMData = 300;
+sampleMData = 17;
 f = waitbar(0, "Rotate each axis", 'Name', "Calibrating Magnetometer...");
 for c = 1:sampleMData
     waitbar(c/sampleMData,f)
@@ -33,10 +33,10 @@ magz_correction = (magz_max+magz_min)/2;
 mag_corrected = [mag_calib(:, 1)-magx_correction mag_calib(:, 2)-magy_correction mag_calib(:, 3)-magz_correction];
 
 %% Import data
-msgfig = msgbox("Now Start sampling",'modal');
-uiwait(msgfig);
+%displayMessage(["Now start sampling"]);
+uiwait(msgbox("Now Start to get sample"));
+%waitfor(msg);
 
-flush(s);
 SampleData = 300;
 imudata = zeros([SampleData 9]);
 

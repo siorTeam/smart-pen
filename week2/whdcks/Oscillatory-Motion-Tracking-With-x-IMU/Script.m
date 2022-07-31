@@ -73,7 +73,8 @@ legend('X', 'Y', 'Z');
 
 %% Calculate linear acceleration in Earth frame (subtracting gravity)
 
-linAcc = tcAcc - [zeros(length(tcAcc), 1), zeros(length(tcAcc), 1), ones(length(tcAcc), 1)];
+linAcc = tcAcc - [zeros(length(tcAcc), 1), zeros(length(tcAcc), ...
+    1), ones(length(tcAcc), 1)];
 linAcc = linAcc * 9.81;     % convert from 'g' to m/s/s
 
 % Plot
