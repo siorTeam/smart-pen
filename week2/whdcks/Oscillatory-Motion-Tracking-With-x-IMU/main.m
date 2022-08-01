@@ -98,6 +98,7 @@ end
 
 order = 1;
 filtCutOff = 0.1;
+% 0 < (2*filtCutOff)/(1/samplePeriod) < 1
 [b, a] = butter(order, (2*filtCutOff)/(1/samplePeriod), 'high');
 linVelHP = filtfilt(b, a, linVel);
 
@@ -115,6 +116,7 @@ end
 
 order = 1;
 filtCutOff = 0.1;
+% 0 < (2*filtCutOff)/(1/samplePeriod) < 1 
 [b, a] = butter(order, (2*filtCutOff)/(1/samplePeriod), 'high');
 linPosHP = filtfilt(b, a, linPos);
 
