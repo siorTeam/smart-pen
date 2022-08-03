@@ -12,7 +12,7 @@ evalkit_app.mlapp 코드를 matlab에서 실행 시킨다.
 2. Magnetometer Calibration  
 지자기 센서의 캘리브레이션을 하는 코드이다. 앱 실행후 최초 한번 실행하여 보정값을 얻어준다. 캘리브레이션 중에서는 imu센서를 모든 축 방향으로 회전시킨다.  
 
-3. Data 얻기
+3. Data 얻기  
 Sampledata 입력 칸에 imu로 부터 얻기 원하는 값의 수를 정하여 입력한다. 그리고 new data버튼을 누르면 imu로 부터 데이터를 얻어온다. 얻은 데이터는 다시 new data를 클릭하거나 앱을 재실행하지 않는다면 유지된다.
 
 4. 경로 추적 해보기  
