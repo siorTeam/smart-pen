@@ -1,4 +1,4 @@
-//nano_ble가 제대로 작동하는지 확인하는 코드입니다. Arduino_LSM9DS1.h 라이브러리 설치 필요
+//Arduino_LSM9DS1.h 라이브러리 설치 필요
 
 #include <Arduino_LSM9DS1.h>
 
