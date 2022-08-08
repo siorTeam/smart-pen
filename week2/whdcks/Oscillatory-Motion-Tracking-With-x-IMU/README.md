@@ -9,6 +9,9 @@ Script.m 을 기반으로 작성한 코드이다. 실행후 지자기 센서의 
 3. MagneticCorrection.m  
 지자기센서의 캘리브레이션 테스트 코드이다. 해당 코드를 동작시켜서 캘리브레이션이 완료된 그래프를 볼수 있다.  
 
+4. main_Madwick.m  
+Madwick filter를 적용한 main 스크립트이다. 나머지는 main.m과 동일하다.
+
 Oscillatory-Motion-Tracking-With-x-IMU
 ======================================
 
