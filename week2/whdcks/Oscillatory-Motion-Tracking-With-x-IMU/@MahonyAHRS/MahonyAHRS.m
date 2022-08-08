@@ -50,7 +50,7 @@ classdef MahonyAHRS < handle
             % Estimated direction of gravity and magnetic field
             v = [2*(q(2)*q(4) - q(1)*q(3))
                  2*(q(1)*q(2) + q(3)*q(4))
-                 q(1)^2 - q(2)^2 - q(3)^2 + q(4)^2];
+                 q(1)^2 - q(2)^2 - q(3)^ 2 + q(4)^2];
             w = [2*b(2)*(0.5 - q(3)^2 - q(4)^2) + 2*b(4)*(q(2)*q(4) - q(1)*q(3))
                  2*b(2)*(q(2)*q(3) - q(1)*q(4)) + 2*b(4)*(q(1)*q(2) + q(3)*q(4))
                  2*b(2)*(q(1)*q(3) + q(2)*q(4)) + 2*b(4)*(0.5 - q(2)^2 - q(3)^2)]; 
