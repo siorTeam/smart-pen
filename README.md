@@ -8,7 +8,7 @@
 2|**IMU-MCU 연결 + 데이터 받는 데모**<br>(아두이노 나노)<br><br>filter (**환경구축** + 논문분석)<br>- ~~PC (i3 4150 + 8gb + WD 320GB)~~|펜 단에서 구현
 3|아두이노 블루투스<br>(딜레이가 클 것이다 -> esp32를 쓰자)<br>-> Arduino Nano 33 BLE<br>어차피 코드 호환됨<br><br>자기센서도 사용<br>논문분석(필터 칼만, 상보, 매드윅)<br>데이터 실시간 처리로 그리기<br>eval kit (실험)<br><br>ssh 포트 안뚫려있음 -> 팀뷰어<br><br>구매목록:<br>abx00034 : 2\~3개<br>mpu9250 : 2\~3개<br>**bno055 : 2개**<br>|펜 단에서 구현
 4|블루투스로 데이터 전송<br>1. 센서 - 자은 (태웅 찬욱 지민)<br>2. 나노ble - 태웅 (자은 찬욱 지민)<br>3. 메인코드 자기센서 - 지민 창민<br>4. gui - 종찬 창민<br>5. 논문 필터예제 - 지민 창민|
-5||pc 단에서 구현
+5|1. BNO055 Bluetooth connect - 자은, 태웅, 지민<br>2. ABX(NANO BLE) Bluetooth connect - 자은, 태웅, 지민<br>3. matlab코드 filter 수정(Mahony -> Madgwick) - 종찬<br>4. ABX(NANO BLE)에 Madgwick 구현 - 창민|pc 단에서 구현
 6||pc 단에서 구현
 7|최종 연산|
 8|보고서 작성, 시연 영상 : 폰-웹 앱|
