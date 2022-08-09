@@ -7,8 +7,9 @@ clear;                         	% clear all variables
 clc;                          	% clear the command terminal
 
 %%Calibrate Magnetometer
-s = serialport("COM7",115200);
-sampleMData = 300;
+s = serialport("COM12",115200);
+flush(s);
+sampleMData = 1000;
 f = waitbar(0, "Rotate each axis", 'Name', "Calibrating Magnetometer...");
 for c = 1:sampleMData
     waitbar(c/sampleMData,f)
@@ -37,7 +38,7 @@ msgfig = msgbox("Now Start sampling",'modal');
 uiwait(msgfig);
 
 flush(s);
-SampleData = 300;
+SampleData = 1000;
 imudata = zeros([SampleData 9]);
 
 f = waitbar(0, "Move imu", 'Name', "Read data from imu");
@@ -121,7 +122,7 @@ linPosHP = filtfilt(b, a, linPos);
 
 
 %% Play animation
-SamplePlotFreq = 1;
+SamplePlotFreq = 10;
 
 SixDOFanimation(linPosHP, R, ...
                 'SamplePlotFreq', SamplePlotFreq, 'Trail', 'DotsOnly', ...
