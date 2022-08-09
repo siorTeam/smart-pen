@@ -1,5 +1,5 @@
 %% Housekeeping
- 
+% Signal Processing Toolbox, DSP System Toolbox 설치
 addpath('ximu_matlab_library');	% include x-IMU MATLAB library
 addpath('quaternion_library');	% include quatenrion library
 close all;                     	% close all figures
