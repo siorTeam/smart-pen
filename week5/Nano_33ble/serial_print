@@ -1,7 +1,8 @@
-# 데이터 값들을 시리얼 모니터에 출력해주는 코드입니다
-# Board Manager-> <Arduino Mbed OS Nano Boards> 설치
-# Library Manager-> <Arduino_LSM9DS1.h> 설치
-# 아두이노에서 보드 Arduino Nano 33BLE로 설정하고 포트 설정하기
+// 데이터 값들을 시리얼 모니터에 출력해주는 코드입니다
+// Board Manager-> <Arduino Mbed OS Nano Boards> 설치
+// Library Manager-> <Arduino_LSM9DS1.h> 설치
+// 아두이노에서 보드 Arduino Nano 33BLE로 설정하고 포트 설정하기
+#include <Arduino_LSM9DS1.h>
 void setup() {
   Serial.begin(115200);
   
