@@ -1,9 +1,9 @@
-// 파이썬 앱을 통해 데이터값들을 csv 파일로 만들어주는 코드입니다
-// 이미 만들어진 파일에 덮어씌우기는 안되는 것 같습니다.
-// pysimplegui 설치
-// pyserial 설치
-// 이 파일과 serial_comm 파일 같은 디렉토리에 넣기
-// 만약 오류 뜨면 ktinker 설치
+# 파이썬 앱을 통해 데이터값들을 csv 파일로 만들어주는 코드입니다
+# 이미 만들어진 파일에 덮어씌우기는 안되는 것 같습니다.
+# pysimplegui 설치
+# pyserial 설치
+# 이 파일과 serial_comm 파일 같은 디렉토리에 넣기
+# 만약 오류 뜨면 ktinker 설치
 
 import csv
 import queue
