@@ -1,4 +1,4 @@
-//Arduino_LSM9DS1.h 라이브러리 설치 필요
+
 
 #include <Arduino_LSM9DS1.h>
 
@@ -12,7 +12,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // put your main code here, to run re
+  peatedly:
   float acc_x, acc_y, acc_z;
 
   if (IMU.accelerationAvailable()) {
