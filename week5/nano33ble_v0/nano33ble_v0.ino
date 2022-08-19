@@ -79,7 +79,7 @@ void loop()
         IMU.readMagneticField(mag_x, mag_y, mag_z);
       }
       
-      sprintf(BLEBuffer,"%.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n"
+      sprintf(BLEBuffer,"%.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f"
       ,acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z);
 
       IMUCharateristic.writeValue(BLEBuffer);
