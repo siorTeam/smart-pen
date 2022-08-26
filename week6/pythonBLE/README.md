@@ -24,6 +24,8 @@ https://bleak.readthedocs.io/en/latest/scanning.html
 특정 charateristic의 uuid를 이용해서 정보를 읽는다.  
 읽어온 정보는 bytearray형식으로 반환된다.  
 
+자세한 사항은 다음 공식문서를 참조하시면 됩니다.  
+https://bleak.readthedocs.io/en/latest/index.html  
 ## 비동기 처리
 Bleak 라이브러리의 함수는 I/O처리동안에 비동기 동작을 지원한다.
 비동기 처리를 위해 asyncio를 사용하여 ble장치로 부터 데이터를 읽는 함수와 읽어온 데이터를 처리하는 함수로 나누어져 있다. 따라서 이 두가지 동작은 비동기적으로 처리되며 이와 같은 동작을 위해서 원형큐를 이용했다.
