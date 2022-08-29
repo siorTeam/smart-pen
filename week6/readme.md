@@ -2,7 +2,7 @@
 https://pypi.org/project/ble-serial/  
 위의 파이썬 패키지를 이용해서 ble연결을 가상 시리얼 포트를 통해 할 수 있다.  
 
-## 아두이노 코드 변경  
+## 아두이노 코드 변경(nano33ble_v1)  
 ble 통신을 시리얼포트로 하기 위해서 Tx, Rx 역할을 하는 Charateristic을 각각 만들어야 한다. 따라서 기존에 존재했던  IMUCharateristic은 IMU_Tx_Charateristic로 이름을 바꾸었고 Rx역할을 하는 IMU_Rx_Charateristic을 추가 했다.  
 ```
 BLECharacteristic IMU_Tx_Charateristic(IMUServiceTxCharacteristicUUID, BLERead | BLENotify, BLE_BUFFER_SIZE);
@@ -83,5 +83,5 @@ MAC주소 대신에 Serive의 UUID를 이용한다. 따라서 이 방법이 좀 
 포트는 COM9, 보드레이트는 9600으로 설정 해야 한다.  
 
 
-## MATLAB 앱 코드 수정  
+## MATLAB 앱 코드 수정(MATLAB_code)    
 ble-serial 명령을 수행후 PC에 ble포트(COM9) 가 생성 되었다면 기존에 만들었던 MATLAB앱을 사용할 수있다. 이때 시리얼 포트를 COM9로 그리고 보드레이트를 9600으로 변경하였다.  
