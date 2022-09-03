@@ -1,8 +1,12 @@
 from ahrs.filters import Madgwick
 from scipy.spatial.transform import Rotation as R
+from scipy import signal
 import numpy as np
 import csv
 import csv
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 acc = list()
 gyr = list()
@@ -32,14 +36,38 @@ Ro = np.zeros((3, 3, len(gyr)))
 #update attitude
 for t in range(1, num_samples):
     Q[t] = madgwick.updateMARG(Q[t-1], gyr=np.array(gyr[t]), acc=np.array(acc[t]), mag=np.array(mag[t]))
+
+for t in range(0, num_samples):
     Ro[:,:,t] = np.transpose(R.from_quat(Q[t]).as_matrix())
 
 tcAcc = np.zeros_like(acc)
-for i in range (1, len(acc)):
-    tcAcc[i,:] = Ro[:,:,i] * np.array(acc)[i,:]
-    print(i)
-    #Ro[:,:,i]
-linAcc = tcAcc - [np.zeros((len(tcAcc), 1)), np.zeros((len(tcAcc), 1)), np.ones((len(tcAcc), 1))]
+for i in range (0, len(acc)):
+    tcAcc[i,:] = np.matmul(Ro[:,:,i], np.transpose(np.array(acc)[i,:]))
+
+linAcc = tcAcc - np.tile([0.,0.,1.], (len(tcAcc),1))
 linAcc = linAcc * 9.81
 
-#print(linAcc)
+linVel = np.zeros_like(linAcc)
+
+for i in range (1,len(linAcc)):
+    linVel[i,:] = linVel[i-1,:] + linAcc[i,:] * (1/sample_rate)
+
+order = 1
+filtCutOff = 0.1
+b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
+linVelHP = signal.filtfilt(b, a, linVel, padlen=0)
+
+linPos = np.zeros_like(linVelHP)
+
+for i in range (1, len(linVelHP)):
+    linPos[i,:] = linPos[i-1,:] + linVelHP[i,:] * (1/sample_rate)
+
+order = 1
+filtCutOff = 0.1
+b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
+linPosHP = signal.filtfilt(b, a, linPos, padlen=0)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(linPosHP[:,0], linPosHP[:,1], linPosHP[:,2])
+plt.show()
