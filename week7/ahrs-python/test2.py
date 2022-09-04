@@ -4,7 +4,7 @@ from quatern2rotMat import quaternion_rotation_matrix as Rotation
 import numpy as np
 import csv
 import math
-
+from madgwickahrs import MadgwickAHRS
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
@@ -32,21 +32,19 @@ acc = np.array(acc)
 gyr = np.array(gyr)
 mag = np.array(mag)
 
-madgwick = Madgwick(frequency = sample_rate, gain = 0.3)
+ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=0.1)
 
 
-#Initial attitude
-Q_init  = np.array([1., 0., 0., 0.])
-Q = np.tile([1., 0., 0., 0.], (len(gyr), 1))
+#Q = np.tile([1., 0., 0., 0.], (len(gyr), 1))
+Q = np.zeros((1000, 4))
 R = np.zeros((3, 3, len(gyr)))
 
 #update attitude
-for t in range(1, num_samples):
-    Q[t] = madgwick.updateMARG(Q[t-1], gyr=(gyr[t]*(math.pi/180)), acc=acc[t], mag=mag[t])
-print(Q[:10])
-for t in range(0, num_samples):
-    R[:,:,t] = Rotation(Q[t])
-
+for i in range(num_samples):
+    ahrs.update(gyroscope = gyr[i, :]*(math.pi/180), accelerometer = acc[i, :], magnetometer = mag[i, :])
+    R[:,:,i] = np.transpose(Rotation(ahrs.quaternion.q))
+    Q[i, :] = ahrs.quaternion.q
+print(Q)
 
 tcAcc = np.zeros_like(acc)
 for i in range (0, len(acc)):
