@@ -64,6 +64,9 @@ if __name__ == "__main__":
 					# [sg.Text("How many sample?"), sg.Input('', key="_DATA_SAMPLE", expand_x=True)],
 					[sg.Button('Select', key="_PORT_EVENT", expand_x=True)]
 				])],
+				[sg.Frame("Connect BLE",[
+					[sg.Button('Connect', key="_BLE_CONNECT",expand_x = True)]
+				])],
 				[sg.Frame("Graph Type", [
 					[sg.Text('Graph Information', size=(20,None), expand_x=True)],
 					[sg.Radio('type 1', "GraphType", key="_GRAPH_SELECT1", expand_x=True)],
@@ -116,6 +119,23 @@ if __name__ == "__main__":
 				PORT_STOP_THREAD = False
 				PORT_OBJ["thread"].join()
 				wind['_PORT_EVENT'].update('Select')
+				wind['_STATUS'].update('Stop Receiving Data')
+		elif "_BLE_CONNECT" == _event:
+			if "Connect" == wind['_BLE_CONNECT'].get_text():
+				wind['_BLE_CONNECT'].update('Stop')
+				wind['_OUTPUT'].update('')
+				PORT_STOP_THREAD = True
+				PORT_OBJ["thread"] = threading.Thread(target=start_serial_data, args=(
+					"COM9",
+					9600,
+					lambda: PORT_STOP_THREAD,
+					mesQue
+					), daemon=True)
+				PORT_OBJ["thread"].start()
+			else:
+				PORT_STOP_THREAD = False
+				PORT_OBJ["thread"].join()
+				wind['_BLE_CONNECT'].update('Connect')
 				wind['_STATUS'].update('Stop Receiving Data')
 
 		try:

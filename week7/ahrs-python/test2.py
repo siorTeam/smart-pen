@@ -8,6 +8,7 @@ from madgwickahrs import MadgwickAHRS
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+import time
 
 acc = list()
 gyr = list()
@@ -44,7 +45,6 @@ for i in range(num_samples):
     ahrs.update(gyroscope = gyr[i, :]*(math.pi/180), accelerometer = acc[i, :], magnetometer = mag[i, :])
     R[:,:,i] = np.transpose(Rotation(ahrs.quaternion.q))
     Q[i, :] = ahrs.quaternion.q
-print(Q)
 
 tcAcc = np.zeros_like(acc)
 for i in range (0, len(acc)):
@@ -74,8 +74,16 @@ b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 linPosHP = signal.filtfilt(b, a, linPos, axis = 0)
 
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
+ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
 ax.plot(linPosHP[:,0], linPosHP[:,1], linPosHP[:,2])
+
+ax.view_init(elev=20,azim=45,roll=90)
+
+plt.axis('off')
+ax.grid(False)
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_zticks([])
+plt.grid(False)
 
 plt.show()
