@@ -162,7 +162,7 @@ def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue
 		if ser.is_open:
 			data = ser.readline()
 			if None != data:
-				print(data)
+				#print(data)
 				_queue.put(f'{data.decode("utf-8")}$connect success')
 		#else:
 	#		_queue.put('$the connect is lost')
