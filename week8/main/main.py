@@ -40,6 +40,8 @@ mesQue = queue.Queue()
 
 sample_rate = 60
 ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=0.1)
+last_Vel = np.array([0., 0., 0. ])
+last_Pos = np.array([0., 0., 0. ])
 
 def make_BLEport ():
 	os.system("ble-serial -s 7078692c-2793-11ed-a261-0242ac120002 -w 70786cec-2793-11ed-a261-0242ac120002 -r 70786bca-2793-11ed-a261-0242ac120002")
@@ -48,9 +50,11 @@ def make_BLEport ():
 def process_imu(_stop_thread: bool, _queue:queue.Queue):
 	global points
 	global ahrs
+	global last_Vel
+	global last_Pos
 	num_samples = 128
 	while True:
-		print("")
+		#print("")
 		if not _stop_thread():
 			break
 		if(_queue.qsize() >= num_samples):
@@ -96,10 +100,10 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 				tcAcc[i,:] = np.matmul(R[:,:,i], np.transpose(acc[i,:]))
 
 			linAcc = tcAcc - np.tile([0.,0.,1.], (len(tcAcc),1))
-			linAcc = linAcc * 9.81
+			linAcc = linAcc * 9.81 
 
 			linVel = np.zeros_like(linAcc)
-
+			linVel[0, :] = last_Vel
 			for i in range (1,len(linAcc)):
 				linVel[i,:] = linVel[i-1,:] + linAcc[i,:] * (1/sample_rate)
 
@@ -108,7 +112,9 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 			linVelHP = signal.filtfilt(b, a, linVel, axis = 0)
 
+			last_Vel = linVelHP[-1,:]
 			linPos = np.zeros_like(linVelHP)
+			linPos[0, :] = last_Pos
 
 			for i in range (1, len(linVelHP)):
 				linPos[i,:] = linPos[i-1,:] + linVelHP[i,:] * (1/sample_rate)
@@ -117,10 +123,14 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			filtCutOff = 0.1
 			b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 			linPosHP = signal.filtfilt(b, a, linPos, axis = 0)
-			print(linPosHP.shape)
+
+			last_Pos = linPosHP[-1, :]
+
+
+			#print(linPosHP.shape)
 			print(btn.reshape(128,1))
-			points = np.append(points, np.concatenate((linPosHP, btn.reshape(128,1)), axis = 1), axis = 0)
-			print(points)
+			#points = np.append(points, np.concatenate((linPosHP, btn.reshape(128,1)), axis = 1), axis = 0)
+			#print(points)
 		
 def search_port_list() -> list:
 	tar = []
