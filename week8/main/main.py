@@ -65,7 +65,8 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			btn = np.array([])
 
 			for i in range(num_samples):
-				line = _queue.get_nowait().split('$')[0].split(", ")
+				line = _queue.get_nowait().split('$')[0].strip().split(", ")
+				print(line)
 				data_block.append([float(f) for f in line])
 			
 			data_block = np.array(data_block)
@@ -128,7 +129,7 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 
 
 			#print(linPosHP.shape)
-			print(btn.reshape(128,1))
+			#print(btn.reshape(128,1))
 			#points = np.append(points, np.concatenate((linPosHP, btn.reshape(128,1)), axis = 1), axis = 0)
 			#print(points)
 		
@@ -145,6 +146,8 @@ def get_port_info(_port_id: str) -> str:
 
 def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue:queue.Queue):
 	ser = serial.Serial(_port_id, _baud_rate)
+	ser.flush()
+	ser.readline()
 	# alpha = 
 	# beta = 
 	# pre_remain = 
@@ -159,6 +162,7 @@ def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue
 		if ser.is_open:
 			data = ser.readline()
 			if None != data:
+				print(data)
 				_queue.put(f'{data.decode("utf-8")}$connect success')
 		#else:
 	#		_queue.put('$the connect is lost')
