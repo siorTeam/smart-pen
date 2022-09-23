@@ -7,7 +7,9 @@
 @encoding: utf-8
 @license: Copyright (c) 2022
 '''
+import os
 import threading
+import multiprocessing as mp 
 import queue
 import serial
 import serial.tools.list_ports as list_ports
@@ -29,18 +31,26 @@ PORT_OBJ = {'thread':None, 'Object':None}
 FILTER_OBJ = {'thread':None, 'Object':None}
 PORT_STOP_THREAD = True
 PORT_INFO = {}
+BLE_PORT = False
 wind = None
 
 raw_imu = queue.Queue()
-points = np.ndarray((0,3))
+points = np.ndarray((0,4))
 mesQue = queue.Queue()
 
 sample_rate = 60
+ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=0.1)
 
+def make_BLEport ():
+	os.system("ble-serial -s 7078692c-2793-11ed-a261-0242ac120002 -w 70786cec-2793-11ed-a261-0242ac120002 -r 70786bca-2793-11ed-a261-0242ac120002")
+	while True:
+		pass
 def process_imu(_stop_thread: bool, _queue:queue.Queue):
 	global points
+	global ahrs
 	num_samples = 128
 	while True:
+		print("")
 		if not _stop_thread():
 			break
 		if(_queue.qsize() >= num_samples):
@@ -59,8 +69,18 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			gyr = data_block[:, 0:3]
 			acc = data_block[:, 3:6]
 			mag = data_block[:, 6:9]
+			btn  = data_block[:, 9]
+			#i=0
+			#for f in data_block[:, 9]:
+			#	if f<0.5:
+			#		btn[0,i] = 0
+			#	else:
+			#		btn[0,i] = 1
+			#	i += 1
+			#		
+			#btn = data_block_int[:, 9]
 
-			ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=0.1)
+			
 			
 			Q = np.zeros((num_samples, 4))
 			R = np.zeros((3, 3, num_samples))
@@ -97,8 +117,10 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			filtCutOff = 0.1
 			b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 			linPosHP = signal.filtfilt(b, a, linPos, axis = 0)
-
-			points = np.append(points, linPosHP, axis = 0)
+			print(linPosHP.shape)
+			print(btn.reshape(128,1))
+			points = np.append(points, np.concatenate((linPosHP, btn.reshape(128,1)), axis = 1), axis = 0)
+			print(points)
 		
 def search_port_list() -> list:
 	tar = []
@@ -134,7 +156,8 @@ def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue
 if __name__ == "__main__":
 
 	sg.theme("DarkBlue")#("HotDogStand")
-
+	com_process = mp.Process(target = make_BLEport, daemon= True)
+	
 	LAYOUT = [
 		[sg.Text('Smart-Pen', font="Helvetica 20 bold")],
 		[
@@ -175,7 +198,6 @@ if __name__ == "__main__":
 	while True:
 		_event, _values = wind.Read(timeout=100)
 		# print([_event, _values])
-
 		if sg.WIN_CLOSED == _event:
 			break
 		elif "_PORT_RELOAD" == _event:
@@ -204,6 +226,7 @@ if __name__ == "__main__":
 				wind['_STATUS'].update('Stop Receiving Data')
 		elif "_BLE_CONNECT" == _event:
 			if "Connect" == wind['_BLE_CONNECT'].get_text():
+				#com_process.start()
 				wind['_BLE_CONNECT'].update('Stop')
 				wind['_OUTPUT'].update('')
 				PORT_STOP_THREAD = True
@@ -222,6 +245,7 @@ if __name__ == "__main__":
 				PORT_OBJ["thread"].start()
 			else:
 				PORT_STOP_THREAD = False
+				#com_process.join()
 				PORT_OBJ["thread"].join()
 				FILTER_OBJ["thread"].join()
 				wind['_BLE_CONNECT'].update('Connect')
