@@ -24,6 +24,6 @@ while True:
         if None != data:
             #print(data.decode("utf-8"))
             line = data.decode("utf-8").strip().split(", ")
-            print(line)
+            #print(line)
             block = [float(f) for f in line]
             print(block)

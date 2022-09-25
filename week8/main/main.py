@@ -35,7 +35,8 @@ BLE_PORT = False
 wind = None
 
 raw_imu = queue.Queue()
-points = np.ndarray((0,4))
+points = np.ndarray((0,3)) #[[x,y,z], [x, y ,z] ...]
+btn_arr = np.ndarray((0,), dtype = int) #[btn0, btn1, ...]
 mesQue = queue.Queue()
 
 sample_rate = 60
@@ -52,29 +53,26 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 	global ahrs
 	global last_Vel
 	global last_Pos
+	global btn_arr
 	num_samples = 128
 	while True:
-		#print("")
+		print(_queue.qsize())
 		if not _stop_thread():
 			break
 		if(_queue.qsize() >= num_samples):
 			data_block = list()
-			gyr = np.array([])
-			acc = np.array([])
-			mag = np.array([])
-			btn = np.array([])
+			gyr = np.ndarray((128, 3))
+			acc = np.ndarray((128, 3))
+			mag = np.ndarray((128, 3))
+			btn = np.ndarray((128,), dtype = int)
 
 			for i in range(num_samples):
 				line = _queue.get_nowait().split('$')[0].strip().split(", ")
-				print(line)
-				data_block.append([float(f) for f in line])
+				gyr[i, :] = np.array([float(line[0]), float(line[1]), float(line[2])])
+				acc[i, :] = np.array([float(line[3]), float(line[4]), float(line[5])])
+				mag[i, :] = np.array([float(line[6]), float(line[7]), float(line[8])])
+				btn[i] = int(line[9])
 			
-			data_block = np.array(data_block)
-
-			gyr = data_block[:, 0:3]
-			acc = data_block[:, 3:6]
-			mag = data_block[:, 6:9]
-			btn  = data_block[:, 9]
 			#i=0
 			#for f in data_block[:, 9]:
 			#	if f<0.5:
@@ -130,8 +128,9 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 
 			#print(linPosHP.shape)
 			#print(btn.reshape(128,1))
-			#points = np.append(points, np.concatenate((linPosHP, btn.reshape(128,1)), axis = 1), axis = 0)
-			#print(points)
+			points = np.append(points, linPosHP, axis=0)
+			btn_arr = np.append(btn_arr, btn)
+			
 		
 def search_port_list() -> list:
 	tar = []
@@ -163,7 +162,7 @@ def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue
 			data = ser.readline()
 			if None != data:
 				#print(data)
-				_queue.put(f'{data.decode("utf-8")}$connect success')
+				_queue.put_nowait(f'{data.decode("utf-8")}$connect success')
 		#else:
 	#		_queue.put('$the connect is lost')
 
