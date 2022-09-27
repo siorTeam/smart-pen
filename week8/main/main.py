@@ -22,13 +22,16 @@ from quatern2rotMat import quaternion_rotation_matrix as Rotation
 import numpy as np
 import csv
 import math
+import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 import time
 
 PORT_OBJ = {'thread':None, 'Object':None}
 FILTER_OBJ = {'thread':None, 'Object':None}
+PLOT_OBJ = {'thread':None, 'Object':None}
 PORT_STOP_THREAD = True
 PORT_INFO = {}
 BLE_PORT = False
@@ -56,7 +59,6 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 	global btn_arr
 	num_samples = 128
 	while True:
-		print(_queue.qsize())
 		if not _stop_thread():
 			break
 		if(_queue.qsize() >= num_samples):
@@ -131,7 +133,50 @@ def process_imu(_stop_thread: bool, _queue:queue.Queue):
 			points = np.append(points, linPosHP, axis=0)
 			btn_arr = np.append(btn_arr, btn)
 			
-		
+def plotter(_stop_thread: bool):
+	global points
+	global btn_arr
+	flag = 1
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
+
+	last_idx = 0
+	while True:
+		if not _stop_thread():
+			break
+		if(len(btn_arr >= 128) and flag == 1):
+			end = len(points) - 1
+			mid = end // 2 - 1 # 중간값
+			fir = 0
+			
+			vector_1 = points[mid]-points[fir]
+			vector_2 = points[mid]-points[end]
+			vector_n = np.cross(vector_1, vector_2)
+
+			elev_rad = np.arctan2(vector_n[1], vector_n[0])
+			azim_rad = np.arctan2(vector_n[2], np.sqrt(vector_n[0]**2 + vector_n[1]**2))
+
+			pi = 3.141592
+			ax.view_init(elev=(elev_rad*pi/180),azim=(azim_rad*pi/180))
+
+			plt.axis('off')
+			ax.grid(False)
+			ax.set_xticks([])
+			ax.set_yticks([])
+			ax.set_zticks([])
+			plt.grid(False)
+    
+			flag = 0
+		if(flag == 0):
+			for idx in range(len(btn_arr)-1):
+				if btn_arr[idx] == 1 and btn_arr[idx+1] == 0:
+					ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 1.0)
+					last_idx = idx
+				elif btn_arr[idx] == 0 and btn_arr[idx+1] == 1:
+					ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 0.0)
+					last_idx = idx
+			plt.show()
+	pass
 def search_port_list() -> list:
 	tar = []
 	_ports = list_ports.comports()
@@ -166,11 +211,22 @@ def start_serial_data(_port_id: str, _baud_rate: int, _stop_thread: bool, _queue
 		#else:
 	#		_queue.put('$the connect is lost')
 
+matplotlib.use('TkAgg')
+def draw_figure(canvas, figure):
+    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    figure_canvas_agg.draw()
+    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure_canvas_agg
+
 if __name__ == "__main__":
+	
+	flag = 1
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
 
 	sg.theme("DarkBlue")#("HotDogStand")
 	com_process = mp.Process(target = make_BLEport, daemon= True)
-	
+
 	LAYOUT = [
 		[sg.Text('Smart-Pen', font="Helvetica 20 bold")],
 		[
@@ -200,15 +256,18 @@ if __name__ == "__main__":
 					[sg.Radio('type 4', "FilterType", key="_FILTER_SELECT4", expand_x=True)],
 				])],
 			], vertical_alignment='top'),
-			sg.Multiline("output Area Ready...", key="_OUTPUT", size=(80,40), border_width=2, autoscroll=True)
+			#sg.Multiline("output Area Ready...", key="_OUTPUT", size=(80,40), border_width=2, autoscroll=True)
 		],
 		[sg.StatusBar("Status Area Ready", key="_STATUS")],
 	]
-
-	wind = sg.Window('Smart-pen', LAYOUT, resizable=True)
-	
+	plot_layout = [[sg.Text('Plot test')],
+          [sg.Canvas(key='-CANVAS-')],
+          [sg.Button('Ok')]]
+	wind = sg.Window('Smart-pen', LAYOUT, resizable=True,finalize=True, element_justification='center')
+	plot_wind = sg.Window('Matplotlib Single Graph', plot_layout, location=(0,0), finalize=True, element_justification='center', font='Helvetica 18')
 
 	while True:
+		print(len(points))
 		_event, _values = wind.Read(timeout=100)
 		# print([_event, _values])
 		if sg.WIN_CLOSED == _event:
@@ -223,7 +282,7 @@ if __name__ == "__main__":
 			if "Select" == wind['_PORT_EVENT'].get_text():
 				if 0 < len(_values["_PORT_SELECT"]):
 					wind['_PORT_EVENT'].update('Stop')
-					wind['_OUTPUT'].update('')
+					#wind['_OUTPUT'].update('')
 					PORT_STOP_THREAD = True
 					PORT_OBJ["thread"] = threading.Thread(target=start_serial_data, args=(
 						_values["_PORT_SELECT"][0],
@@ -241,7 +300,7 @@ if __name__ == "__main__":
 			if "Connect" == wind['_BLE_CONNECT'].get_text():
 				#com_process.start()
 				wind['_BLE_CONNECT'].update('Stop')
-				wind['_OUTPUT'].update('')
+				#wind['_OUTPUT'].update('')
 				PORT_STOP_THREAD = True
 				PORT_OBJ["thread"] = threading.Thread(target=start_serial_data, args=(
 					"COM9",
@@ -254,13 +313,18 @@ if __name__ == "__main__":
 					lambda: PORT_STOP_THREAD,
 					raw_imu
 					), daemon=True)
+				#PLOT_OBJ["thread"] = threading.Thread(target = plotter, args =(
+				#	lambda: PORT_STOP_THREAD,
+				#), daemon=True)
 				FILTER_OBJ["thread"].start()
 				PORT_OBJ["thread"].start()
+				#PLOT_OBJ["thread"].start()
 			else:
 				PORT_STOP_THREAD = False
 				#com_process.join()
 				PORT_OBJ["thread"].join()
 				FILTER_OBJ["thread"].join()
+				#PLOT_OBJ["thread"].join()
 				wind['_BLE_CONNECT'].update('Connect')
 				wind['_STATUS'].update('Stop Receiving Data')
 
@@ -274,7 +338,39 @@ if __name__ == "__main__":
 			#wind['_OUTPUT'].update(_prev_output+'\n'+points)
 			#wind['_STATUS'].update(_status)
 			pass
-		
+	if(len(btn_arr) >= 128 and flag == 1):
+			end = len(points) - 1
+			mid = end // 2 - 1 # 중간값
+			fir = 0
+			
+			vector_1 = points[mid]-points[fir]
+			vector_2 = points[mid]-points[end]
+			vector_n = np.cross(vector_1, vector_2)
+
+			elev_rad = np.arctan2(vector_n[1], vector_n[0])
+			azim_rad = np.arctan2(vector_n[2], np.sqrt(vector_n[0]**2 + vector_n[1]**2))
+
+			pi = 3.141592
+			ax.view_init(elev=(elev_rad*pi/180),azim=(azim_rad*pi/180))
+
+			plt.axis('off')
+			ax.grid(False)
+			ax.set_xticks([])
+			ax.set_yticks([])
+			ax.set_zticks([])
+			plt.grid(False)
+    
+			flag = 0
+	if(flag == 0):
+		for idx in range(len(btn_arr)-1):
+			if btn_arr[idx] == 1 and btn_arr[idx+1] == 0:
+				ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 1.0)
+				last_idx = idx
+			elif btn_arr[idx] == 0 and btn_arr[idx+1] == 1:
+				ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 0.0)
+				last_idx = idx
+	draw_figure(plot_wind['-CANVAS-'].TKCanvas, fig)
+	
 
 	wind.Close()
 	del wind
