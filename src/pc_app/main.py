@@ -28,13 +28,17 @@ mesQue = queue.Queue()
 
 
 
+
 def process_imu(_queue:queue.Queue, mag_calib:list):
+	beta = 0.3
+	cutoff = 0.3
+
 	points = np.ndarray((0,3))
 	btn_arr = np.ndarray((0,), dtype = int)
 	num_samples = _queue.qsize()
 
 	sample_rate = 60
-	ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=0.1)
+	ahrs = MadgwickAHRS(sampleperiod=(1/sample_rate),  beta=beta)
 
 	data_block = list()
 	
@@ -74,7 +78,7 @@ def process_imu(_queue:queue.Queue, mag_calib:list):
 		linVel[i,:] = linVel[i-1,:] + linAcc[i,:] * (1/sample_rate)
 
 	order = 1
-	filtCutOff = 0.1
+	filtCutOff = cutoff
 	b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 	linVelHP = signal.filtfilt(b, a, linVel, axis = 0)
 
@@ -85,7 +89,7 @@ def process_imu(_queue:queue.Queue, mag_calib:list):
 		linPos[i,:] = linPos[i-1,:] + linVelHP[i,:] * (1/sample_rate)
 
 	order = 1
-	filtCutOff = 0.1
+	filtCutOff = cutoff
 	b, a = signal.butter(order, (2*filtCutOff)/(sample_rate), btype='highpass')
 	linPosHP = signal.filtfilt(b, a, linPos, axis = 0)
 
@@ -100,15 +104,13 @@ def plotter(points, btn_arr):
 	ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
 
 	clicked_idx = np.where(btn_arr == 1)
-	print(clicked_idx[0][0])
 	s_idx = clicked_idx[0][0]
 	
 	for idx in range(s_idx, len(btn_arr)-1):
 		if btn_arr[idx+1] == 0:
 			last_idx = idx
-
-	first_line = btn_arr[s_idx:last_idx]
-	print(first_line)
+			break
+	first_line = points[s_idx:last_idx]
 	end = len(first_line) - 1 # 끝값
 	mid = end // 2 - 1 # 중간값
 	fir = 0
@@ -134,10 +136,10 @@ def plotter(points, btn_arr):
 	last_idx = 0
 	for idx in range(len(btn_arr)-1):
 		if btn_arr[idx] == 1 and btn_arr[idx+1] == 0:
-			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 1.0)
+			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], color="b", alpha = 1.0)
 			last_idx = idx
 		elif btn_arr[idx] == 0 and btn_arr[idx+1] == 1:
-			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 0.0)
+			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], color="b", alpha = 0.0)
 			last_idx = idx
 
 	plt.show()
