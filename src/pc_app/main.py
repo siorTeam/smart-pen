@@ -1,4 +1,5 @@
 import os
+import subprocess
 import threading
 import multiprocessing as mp 
 import queue
@@ -16,6 +17,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import time
 
+BLE_CMD = "ble-serial -s 7078692c-2793-11ed-a261-0242ac120002 -w 70786cec-2793-11ed-a261-0242ac120002 -r 70786bca-2793-11ed-a261-0242ac120002"
 PORT_STOP_THREAD = True
 PORT_OBJ = {'thread':None, 'Object':None}
 PortQue = queue.Queue()
@@ -256,15 +258,10 @@ if __name__ == "__main__":
 			elif window == wind:     
 				break
 		elif "_BLE_CONNECT" == _event:
-			if(not com_proc.is_alive()):
-				com_proc = mp.Process(target = make_BLEport, daemon = True)
+			#if(not com_proc.is_alive()):
+			#	com_proc = mp.Process(target = make_BLEport, daemon = True)
 			if "Connect" == wind['_BLE_CONNECT'].get_text(): 
-				com_proc.start()
-				wind['_BLE_CONNECT'].update('Stop')
-			else:
-				com_proc.terminate()
-				com_proc.join()
-				wind['_BLE_CONNECT'].update('Connect')
+				result = subprocess.Popen(BLE_CMD.split(' '), stdout=subprocess.DEVNULL, creationflags=subprocess.CREATE_NEW_CONSOLE)
 		elif "_PEN_CONNECT" == _event:
 			if "Connect" == wind['_PEN_CONNECT'].get_text(): 
 				wind['_PEN_CONNECT'].update('Stop')
