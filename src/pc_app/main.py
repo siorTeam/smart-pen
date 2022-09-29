@@ -28,7 +28,7 @@ mesQue = queue.Queue()
 
 
 
-def process_imu( _queue:queue.Queue):
+def process_imu(_queue:queue.Queue, mag_calib:list):
 	points = np.ndarray((0,3))
 	btn_arr = np.ndarray((0,), dtype = int)
 	num_samples = _queue.qsize()
@@ -50,6 +50,7 @@ def process_imu( _queue:queue.Queue):
 		mag[i, :] = np.array([float(line[6]), float(line[7]), float(line[8])])
 		btn[i] = int(line[9])
 
+	#mag = [mag_calib[:, 0] - mag_calib[0], mag_calib[:, 1] - mag_calib[1], mag_calib[:, 2] - mag_calib[2]]
 	
 	
 	Q = np.zeros((num_samples, 4))
@@ -97,36 +98,45 @@ def process_imu( _queue:queue.Queue):
 def plotter(points, btn_arr):
 	fig = plt.figure()	
 	ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
-	flag = 1 #이거는 메인코드 위의 init에서 한번만 실행되야되는거
-	if flag == 1:
-		end = len(points) - 1 # 끝값
-		mid = end // 2 - 1 # 중간값
-		fir = 0
 
-		vector_1 = points[mid]-points[fir]
-		vector_2 = points[mid]-points[end]
-		vector_n = np.cross(vector_1, vector_2)
+	clicked_idx = np.where(btn_arr == 1)
+	print(clicked_idx[0][0])
+	s_idx = clicked_idx[0][0]
+	
+	for idx in range(s_idx, len(btn_arr)-1):
+		if btn_arr[idx+1] == 0:
+			last_idx = idx
 
-		elev_rad = np.arctan2(vector_n[1], vector_n[0])
-		azim_rad = np.arctan2(vector_n[2], np.sqrt(vector_n[0]**2 + vector_n[1]**2))
+	first_line = btn_arr[s_idx:last_idx]
+	print(first_line)
+	end = len(first_line) - 1 # 끝값
+	mid = end // 2 - 1 # 중간값
+	fir = 0
 
-		pi = 3.141592
-		ax.view_init(elev=(elev_rad*pi/180),azim=(azim_rad*pi/180))
+	vector_1 = first_line[mid]-first_line[fir]
+	vector_2 = first_line[mid]-first_line[end]
+	vector_n = np.cross(vector_1, vector_2)
 
-		plt.axis('off')
-		ax.grid(False)
-		ax.set_xticks([])
-		ax.set_yticks([])
-		ax.set_zticks([])
-		plt.grid(False)
+	elev_rad = np.arctan2(vector_n[1], vector_n[0])
+	azim_rad = np.arctan2(vector_n[2], np.sqrt(vector_n[0]**2 + vector_n[1]**2))
 
-	flag = 0 
+	pi = 3.141592
+	ax.view_init(elev=(elev_rad*pi/180),azim=(azim_rad*pi/180))
+
+	plt.axis('off')
+	ax.grid(False)
+	ax.set_xticks([])
+	ax.set_yticks([])
+	ax.set_zticks([])
+	plt.grid(False)
+
+
 	last_idx = 0
 	for idx in range(len(btn_arr)-1):
-		if btn_arr[idx] == 0 and btn_arr[idx+1] == 1:
+		if btn_arr[idx] == 1 and btn_arr[idx+1] == 0:
 			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 1.0)
 			last_idx = idx
-		elif btn_arr[idx] == 1 and btn_arr[idx+1] == 0:
+		elif btn_arr[idx] == 0 and btn_arr[idx+1] == 1:
 			ax.plot(points[last_idx:idx-1,0], points[last_idx:idx-1,1], points[last_idx:idx-1,2], alpha = 0.0)
 			last_idx = idx
 
@@ -150,6 +160,33 @@ def get_imu_data(ser, data_que, port_que):
 			if None != data:
 				data_que.put_nowait(data.decode("utf-8"))
 
+def magnetometer_calib(_queue:queue.Queue):
+	
+	num_samples = _queue.qsize()
+	mag = np.ndarray((num_samples, 3))
+	for i in range(num_samples):
+		line = _queue.get_nowait().strip().split(", ")
+		mag[i, :] = np.array([float(line[6]), float(line[7]), float(line[8])])
+
+	magx_min = np.min(mag[:,0])
+	magx_max = np.max(mag[:,0])
+	magy_min = np.min(mag[:,1])
+	magy_max = np.max(mag[:,1])
+	magz_min = np.min(mag[:,2])
+	magz_max = np.max(mag[:,2])
+
+	magx_correction = (magx_max+magx_min) / 2
+	magy_correction = (magy_max+magy_min) / 2
+	magz_correction = (magz_max+magz_min) / 2
+
+	f = open("mag.txt",'w')
+	data = str(magx_correction) + ", "+str(magy_correction) +","+str(magy_correction)
+	f.write(data)
+	f.close()
+
+	return [magx_correction, magy_correction, magz_correction]
+
+		
 def make_main_win():
 	sg.theme("DarkBlue")#("HotDogStand"
 	LAYOUT = [
@@ -173,20 +210,32 @@ def make_main_win():
 def make_draw_win():
 	sg.theme("DarkBlue")	
 	layout = [
-		[sg.Text('Getting data from smartpen', font="Helvetica 20 bold")],
-		[sg.Text('Click OK', font="Helvetica 20 bold")],
+		[sg.Text('Getting data from smartpen', font="Helvetica 13")],
+		[sg.Text('Click OK if your are finished drawing', font="Helvetica 11")],
 		[sg.Button('OK', key="_OK",expand_x = True)]
 	]
 	
 	return sg.Window('Drawing', layout, resizable=True, finalize=True,element_justification='center')
+
+def make_calib_win():
+	sg.theme("DarkBlue")	
+	layout = [
+		[sg.Text('Rotate pen all direction', font="Helvetica 13")],
+		[sg.Text('Calibration will be finished after 5sec', font="Helvetica 11")],
+	]
+	return sg.Window('Calibrating', layout, resizable=True, finalize=True,element_justification='center')
 
 if __name__ == "__main__":
 	
 	com_proc = mp.Process(target = make_BLEport, daemon = True)
 	ser = serial.Serial()
 	
+	calib_txt = open("mag.txt", 'r')
+	line = calib_txt.readline()
+	mag_calib = [float(f) for f in line.split(",")]
+	calib_txt.close()
 
-	wind , draw_wind= make_main_win(), None
+	wind , draw_wind, calib_wind = make_main_win(), None, None
 	while True:
 		#_event, _values = wind.Read(timeout=100)
 		window, _event, _values = sg.read_all_windows()
@@ -197,10 +246,11 @@ if __name__ == "__main__":
 			if window == draw_wind:  
 				PortQue.put_nowait('F')   
 				PORT_OBJ["thread"].join() 
-				print(raw_imu)
-				window2 = None
-				points, btn_arr = process_imu(raw_imu)
+				draw_wind = None
+				points, btn_arr = process_imu(raw_imu, mag_calib)
 				plotter(points, btn_arr)
+			elif window == calib_wind:
+				calib_wind = None
 			elif window == wind:     
 				break
 		elif "_BLE_CONNECT" == _event:
@@ -228,87 +278,20 @@ if __name__ == "__main__":
 			btn_arr = np.ndarray((0,), dtype = int) #[btn0, btn1, ...]
 			PORT_OBJ["thread"] = threading.Thread(target= get_imu_data, args = (ser, raw_imu, PortQue), daemon= True)
 			PORT_OBJ["thread"].start()
-			
-			
-
-				
-
-	#wind.Close()
-	#del wind
-'''
-	while True:
-		_event, _values = wind.Read(timeout=100)
-		# print([_event, _values])
-		if sg.WIN_CLOSED == _event:
-			break
-		elif "_PORT_RELOAD" == _event:
-			wind['_PORT_SELECT'].update(search_port_list())
-		elif "_PORT_SELECT" == _event:
-			if 0 < len(_values['_PORT_SELECT']):
-				wind['_PORT_INFO'].update(get_port_info(_values['_PORT_SELECT'][0]))
-				wind['_STATUS'].update(f'{_values["_PORT_SELECT"][0]} was selected')
-		elif "_PORT_EVENT" == _event:
-			if "Select" == wind['_PORT_EVENT'].get_text():
-				if 0 < len(_values["_PORT_SELECT"]):
-					wind['_PORT_EVENT'].update('Stop')
-					#wind['_OUTPUT'].update('')
-					PORT_STOP_THREAD = True
-					PORT_OBJ["thread"] = threading.Thread(target=start_serial_data, args=(
-						_values["_PORT_SELECT"][0],
-						115200,
-						lambda: PORT_STOP_THREAD,
-						mesQue
-						), daemon=True)
-					PORT_OBJ["thread"].start()
-			else:
-				PORT_STOP_THREAD = False
-				PORT_OBJ["thread"].join()
-				wind['_PORT_EVENT'].update('Select')
-				wind['_STATUS'].update('Stop Receiving Data')
-		elif "_BLE_CONNECT" == _event:
-			if "Connect" == wind['_BLE_CONNECT'].get_text():
-				#com_process.start()
-				wind['_BLE_CONNECT'].update('Stop')
-				#wind['_OUTPUT'].update('')
-				PORT_STOP_THREAD = True
-				PORT_OBJ["thread"] = threading.Thread(target=start_serial_data, args=(
-					"COM9",
-					9600,
-					lambda: PORT_STOP_THREAD,
-					raw_imu
-					), daemon=True)
-					
-				FILTER_OBJ["thread"] = threading.Thread(target=process_imu, args=(
-					lambda: PORT_STOP_THREAD,
-					raw_imu
-					), daemon=True)
-				PLOT_OBJ["thread"] = threading.Thread(target = plotter, args =(
-					lambda: PORT_STOP_THREAD,
-				), daemon=True)
-				FILTER_OBJ["thread"].start()
-				PORT_OBJ["thread"].start()
-				PLOT_OBJ["thread"].start()
-			else:
-				PORT_STOP_THREAD = False
-				#com_process.join()
-				PORT_OBJ["thread"].join()
-				FILTER_OBJ["thread"].join()
-				PLOT_OBJ["thread"].join()
-				wind['_BLE_CONNECT'].update('Connect')
-				wind['_STATUS'].update('Stop Receiving Data')
-
-		#try:
-		#	message = mesQue.get_nowait()
-		#except queue.Empty:
-		#	message = None
-		#else:
-		#	#_output, _status = message.split('$')
-		#	#_prev_output = wind['_OUTPUT'].get()
-		#	#wind['_OUTPUT'].update(_prev_output+'\n'+points)
-		#	#wind['_STATUS'].update(_status)
-		#	pass
-	
-
-    wind.Close()
-	del wind
-    '''
+		elif "_CALIB" == _event:
+			calib_wind = make_calib_win()
+			raw_imu = queue.Queue()
+			PortQue =  queue.Queue()
+			points = np.ndarray((0,3)) #[[x,y,z], [x, y ,z] ...]
+			btn_arr = np.ndarray((0,), dtype = int) #[btn0, btn1, ...]
+			PORT_OBJ["thread"] = threading.Thread(target= get_imu_data, args = (ser, raw_imu, PortQue), daemon= True)
+			PORT_OBJ["thread"].start()
+			start_time = time.time()
+			while True:
+				if (time.time() - start_time) >= 5:
+					calib_wind.close()
+					break
+			PortQue.put_nowait('F')   
+			PORT_OBJ["thread"].join()
+			mag_calib = magnetometer_calib(raw_imu)
+			print(mag_calib)
