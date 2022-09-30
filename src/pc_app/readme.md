@@ -1,4 +1,13 @@
-# ble-serial을 이용해서 가상포트로 ble 연결하기  
+# 준비사항    
+
+# 1. 파이썬 라이브러리 설치  
+
+
+```
+pip install -r requirements.txt
+```  
+
+# 2. ble-serial을 이용해서 가상포트로 ble 연결하기  
 https://pypi.org/project/ble-serial/  
 위의 파이썬 패키지를 이용해서 ble연결을 가상 시리얼 포트를 통해 할 수 있다.  
 
@@ -26,3 +35,9 @@ ble-serial 패키지에는 포트연결, 초기화등을 위한 스크립트가 
 정상적으로 실행 된다면 새로운 python창이 떠서 C:/Program Files (x86)/com0com/ 에 설치된 드라이버를 찾아서 ble를 위한 가상 포트를 생성한다.  
 
 포트생성이 정상적으로 되었다면 COM9포트로 ble 장치를 연결 할 수있다.
+
+# 실행  
+```
+python main.py
+```  
+
