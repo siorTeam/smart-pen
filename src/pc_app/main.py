@@ -197,13 +197,13 @@ def magnetometer_calib(_queue:queue.Queue):
 def make_main_win():
     sg.theme("DarkBlue")#("HotDogStand"
     LAYOUT = [
-        [sg.Text('Smart-Pen', font="Helvetica 20 bold")],
+        [sg.Text('Space-Pen', font="Helvetica 20 bold")],
         [
             sg.Column([
                 [sg.Frame("Connect BLE",[
                     [sg.Button('Connect', key="_BLE_CONNECT",expand_x = True)]
                 ])],
-                [sg.Frame("SmartPen",[
+                [sg.Frame("SpacePen",[
                     [sg.Button('Connect', key="_PEN_CONNECT",expand_x = True)],
                     [sg.Button('Draw', key="_Draw",expand_x = True)],
                     [sg.Button('Calibration', key="_CALIB",expand_x = True)]
@@ -212,12 +212,12 @@ def make_main_win():
         ],
         [sg.StatusBar("Status Area Ready", key="_STATUS")],
     ]
-    return sg.Window('Smart-pen', LAYOUT, resizable=True,finalize=True, element_justification='center')
+    return sg.Window('Space-pen', LAYOUT, resizable=True,finalize=True, element_justification='center')
 
 def make_draw_win():
     sg.theme("DarkBlue")    
     layout = [
-        [sg.Text('Getting data from smartpen', font="Helvetica 13")],
+        [sg.Text('Getting data from spacepen', font="Helvetica 13")],
         [sg.Text('Click OK if your are finished drawing', font="Helvetica 11")],
         [sg.Button('OK', key="_OK",expand_x = True)]
     ]
@@ -233,8 +233,7 @@ def make_calib_win():
     return sg.Window('Calibrating', layout, resizable=True, finalize=True,element_justification='center')
 
 if __name__ == "__main__":
-    
-    com_proc = mp.Process(target = make_BLEport, daemon = True)
+
     ser = serial.Serial()
     
     calib_txt = open("mag.txt", 'r')
