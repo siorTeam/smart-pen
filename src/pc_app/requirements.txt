@@ -1,0 +1,7 @@
+pyserial
+PySimpleGUI
+numpy
+scipy
+AHRS
+matplotlib
+ble-serial
