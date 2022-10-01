@@ -1,5 +1,21 @@
 # smart-pen
 
+## 최종 결과물
+
+- 작품 사진
+  ![작품 사진](pic/subject_picture.jpg)
+
+- 작품 결과물
+  별모양 | 알파벳 W | 알파벳 B
+  ---|---|---
+  ![star](pic/별.jpg)|![alphabet-w](pic/w.png)|![alphabet-b](pic/b.png)
+
+- [시연 영상](https://youtu.be/AMKU_AyEsPM)
+
+## 최종 소스코드 및 README
+[src 폴더](src) 아래에 있는 소스코드가 해당 소스코드입니다.
+- `nano33ble_v2`: 아두이노에 이식하는 소스코드
+- `pc_app`: PC에서 실행시키는 소스코드,	해당 폴더에 있는 [`README`파일](src/pc_app/readme.md)을 읽어주세요
 ## 프로젝트 일정
 
 주차|내용|비고
